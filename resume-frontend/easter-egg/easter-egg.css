@@ -1,0 +1,315 @@
+/**
+ * easter-egg.css
+ * -----------------------------------------------------------------------
+ * Styling for the hidden discovery sequence. Deliberately namespaced
+ * under `.ee-` so nothing here can collide with the existing site's
+ * classes (.btn, .card, .terminal, etc.) — this file adds a new layer
+ * on top of the page, it does not modify the existing design system.
+ *
+ * All colors/fonts are pulled from the :root custom properties already
+ * defined in index.html's <style> block. This file assumes those
+ * variables exist (--bg-elevated, --accent, --font-mono, etc.) and does
+ * not redefine them — if index.html's :root variables ever change, this
+ * file's appearance updates automatically along with the rest of the
+ * site, which is the intended behavior (the easter egg should always
+ * look like it belongs to this site, not a fixed snapshot of it).
+ * -----------------------------------------------------------------------
+ */
+
+/* ---------- STAGE 1: bouncing logo ---------- */
+
+.ee-bouncing-logo {
+  z-index: 9998;
+  /* position, left/top, and width/height are set inline by
+     bouncing-logo.js since they're driven by per-frame animation
+     state — this file only owns the static visual treatment. */
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.5));
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+.ee-bouncing-logo:hover {
+  filter: drop-shadow(0 4px 20px rgba(56, 217, 154, 0.35));
+}
+
+/* ---------- SHARED: full-screen overlay used by stages 2 & 3 ---------- */
+
+.ee-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+
+  background: rgba(11, 15, 20, 0.86); /* derived from --bg, matches nav's translucency approach */
+  backdrop-filter: blur(10px);
+
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.ee-overlay.ee-visible {
+  opacity: 1;
+}
+
+.ee-panel {
+  width: 100%;
+  max-width: 480px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 36px 32px;
+  box-shadow: 0 20px 60px -20px rgba(0, 0, 0, 0.7);
+
+  transform: translateY(10px) scale(0.98);
+  transition: transform 0.25s ease;
+}
+
+.ee-overlay.ee-visible .ee-panel {
+  transform: translateY(0) scale(1);
+}
+
+.ee-panel-label {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 18px;
+}
+
+.ee-panel-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 14px;
+}
+
+.ee-panel-body {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  color: var(--text-muted);
+  margin-bottom: 26px;
+  line-height: 1.6;
+}
+
+.ee-panel-status {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+/* ---------- STAGE 2: letters hidden inside the site's own copy ---------- */
+/* These spans live inline inside index.html's real paragraphs/headings —
+   this file only ever adds `-active` or `-collected` as a *second*
+   class on top of the base `.ee-hidden-letter` that letter-puzzle.js
+   toggles at runtime. Until that JS mounts (i.e. before the stage-1
+   logo is clicked), a letter has neither modifier and renders as
+   completely ordinary text — that's what keeps it truly inactive, not
+   just visually muted. */
+
+.ee-hidden-letter {
+  border-radius: 3px;
+}
+
+.ee-hidden-letter-active {
+  cursor: pointer;
+  border-bottom: 1px dotted rgba(56, 217, 154, 0.45);
+  transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.ee-hidden-letter-active:hover,
+.ee-hidden-letter-active:focus-visible {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.ee-hidden-letter-active:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.ee-hidden-letter-collected {
+  color: var(--accent);
+  font-weight: 600;
+  border-bottom: none;
+}
+
+/* ---------- SHARED: stage-2 hunt-progress HUD ---------- */
+/* Appears once the bouncing logo (stage 1) has been clicked and stays
+   fixed to the viewport while the visitor reads/scrolls the page
+   looking for the next letter. */
+
+.ee-hud {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  z-index: 9997;
+  transform: translateX(-50%) translateY(8px);
+
+  display: flex;
+  align-items: center;
+  gap: 14px;
+
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 18px;
+  box-shadow: 0 12px 32px -14px rgba(0, 0, 0, 0.7);
+
+  opacity: 0;
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.ee-hud.ee-visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.ee-hud-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+.ee-hud-blanks {
+  font-family: var(--font-mono);
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+@media (max-width: 520px) {
+  .ee-hud {
+    left: 16px;
+    right: 16px;
+    bottom: 16px;
+    transform: translateY(8px);
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  .ee-hud.ee-visible {
+    transform: translateY(0);
+  }
+}
+
+/* ---------- STAGE 3: registration form ---------- */
+
+.ee-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ee-field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.ee-field label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.ee-field input {
+  font-family: var(--font-body);
+  font-size: 14.5px;
+  color: var(--text);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 12px;
+  transition: border-color 0.15s ease;
+}
+
+.ee-field input:focus {
+  border-color: var(--accent);
+}
+
+.ee-form-error {
+  display: none;
+  font-family: var(--font-mono);
+  font-size: 12.5px;
+  color: #e05d5d; /* matches the existing .dot-r red used elsewhere on the page */
+  line-height: 1.5;
+}
+
+.ee-form-error.ee-visible-inline {
+  display: block;
+}
+
+/* ---------- SHARED: buttons ---------- */
+/* Namespaced separately from the site's existing .btn/.btn-primary so
+   this file has zero dependency on index.html's button styles — they
+   happen to look similar by design, not by inheritance. */
+
+.ee-btn {
+  font-family: var(--font-mono);
+  font-size: 13.5px;
+  padding: 11px 20px;
+  border-radius: 6px;
+  border: 1px solid transparent;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+  margin-top: 4px;
+}
+
+.ee-btn-primary {
+  background: var(--accent);
+  color: #14100a;
+  font-weight: 600;
+}
+
+.ee-btn-primary:hover {
+  background: #5ce6ae;
+  transform: translateY(-1px);
+}
+
+.ee-btn-secondary {
+  border-color: var(--border);
+  color: var(--text-muted);
+  background: transparent;
+}
+
+.ee-btn-secondary:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---------- ACCESSIBILITY: reduced motion ---------- */
+/* Mirrors index.html's existing global reduced-motion rule so this
+   file's transitions collapse the same way the rest of the site's do. */
+@media (prefers-reduced-motion: reduce) {
+  .ee-overlay,
+  .ee-panel,
+  .ee-hidden-letter-active,
+  .ee-hud,
+  .ee-btn {
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ---------- RESPONSIVE ---------- */
+
+@media (max-width: 520px) {
+  .ee-panel {
+    padding: 28px 22px;
+  }
+}

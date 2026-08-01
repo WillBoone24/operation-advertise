@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Will Boone — Systems &amp; Security Engineering</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="easter-egg/easter-egg.css">
+<style>
+  :root {
+    --bg: #0b0f14;
+    --bg-elevated: #121820;
+    --bg-card: #0f151c;
+    --border: #1e2733;
+    --border-soft: #171f29;
+    --text: #e6e8eb;
+    --text-muted: #8b93a1;
+    --text-dim: #5b6472;
+    --accent: #38d99a;
+    --accent-dim: #1fa876;
+    --accent-soft: rgba(56, 217, 154, 0.12);
+    --teal: #4a9eff;
+    --teal-soft: rgba(74, 158, 255, 0.12);
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+    --font-body: 'Inter', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    line-height: 1.6;
+    background-image:
+      radial-gradient(circle at 15% 10%, rgba(56, 217, 154, 0.05), transparent 40%),
+      radial-gradient(circle at 85% 0%, rgba(74, 158, 255, 0.05), transparent 35%);
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  ::selection { background: var(--accent-soft); color: var(--accent); }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 3px;
+  }
+
+  .wrap {
+    position: relative;
+    max-width: 1040px;
+    margin: 0 auto;
+    padding: 0 28px;
+  }
+
+  /* ---------- SITE LOGO BADGE ---------- */
+  /* Anchored to .wrap (the actual 1040px-max centered content column),
+     not the viewport or the full-width header.hero — that's the fix
+     for two earlier broken versions: one relied on blank space OUTSIDE
+     the content column (only visible on 1400px+ windows), the other
+     positioned relative to header.hero's full edge-to-edge width
+     (same bug in a different form). Pulled up via a negative top
+     offset into header.hero's 88px top padding, right-aligned to the
+     content column's actual right edge — correct at any width where
+     the two-column hero grid is showing. Hidden below 800px, matching
+     the breakpoint where that grid collapses to one column. */
+  .site-logo-badge {
+    position: absolute;
+    top: -70px;
+    right: 0;
+    z-index: 5;
+    width: 76px;
+    height: 76px;
+    pointer-events: none; /* decorative brand mark, not interactive */
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.45));
+  }
+  @media (max-width: 800px) {
+    .site-logo-badge { display: none; }
+  }
+
+  /* ---------- NAV ---------- */
+  nav {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    backdrop-filter: blur(10px);
+    background: rgba(11, 15, 20, 0.82);
+    border-bottom: 1px solid var(--border-soft);
+  }
+  nav .wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 62px;
+  }
+  .logo {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text);
+    letter-spacing: 0.02em;
+  }
+  .logo span { color: var(--accent); }
+  .nav-links {
+    display: flex;
+    gap: 28px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+  .nav-links a { transition: color 0.15s ease; }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-links .num { color: var(--text-dim); margin-right: 6px; }
+
+  /* ---------- HERO ---------- */
+  header.hero {
+    position: relative;
+    padding: 88px 0 76px;
+    border-bottom: 1px solid var(--border-soft);
+  }
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 56px;
+    align-items: center;
+  }
+  .eyebrow {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--teal);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  .eyebrow::before {
+    content: '';
+    width: 6px;
+    height: 6px;
+    background: var(--teal);
+    border-radius: 50%;
+    box-shadow: 0 0 8px var(--teal);
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(2.4rem, 5vw, 3.4rem);
+    font-weight: 600;
+    line-height: 1.08;
+    letter-spacing: -0.01em;
+    margin-bottom: 20px;
+  }
+  h1 .accent { color: var(--accent); }
+  .hero-desc {
+    color: var(--text-muted);
+    font-size: 16.5px;
+    max-width: 46ch;
+    margin-bottom: 32px;
+  }
+  .hero-desc strong { color: var(--text); font-weight: 500; }
+
+  .cta-row { display: flex; gap: 14px; flex-wrap: wrap; }
+  .btn {
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    padding: 12px 20px;
+    border-radius: 6px;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    transition: all 0.15s ease;
+    border: 1px solid transparent;
+  }
+  .btn-primary {
+    background: var(--accent);
+    color: #14100a;
+    font-weight: 600;
+  }
+  .btn-primary:hover { background: #5ce6ae; transform: translateY(-1px); }
+  .btn-secondary {
+    border-color: var(--border);
+    color: var(--text);
+  }
+  .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+  /* ---------- TERMINAL (signature element) ---------- */
+  .terminal {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 14px;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 50%; }
+  .dot-r { background: #e05d5d; }
+  .dot-y { background: #e8b93d; }
+  .dot-g { background: #4bb35a; }
+  .terminal-title {
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-dim);
+    margin-left: 6px;
+  }
+  .terminal-body {
+    padding: 20px 22px 26px;
+    font-family: var(--font-mono);
+    font-size: 13.5px;
+    min-height: 240px;
+  }
+  .term-line { margin-bottom: 10px; opacity: 0; animation: fadeIn 0.3s ease forwards; }
+  .term-prompt { color: var(--teal); }
+  .term-output { color: var(--text-muted); padding-left: 18px; }
+  .term-output .hl { color: var(--accent); }
+  .cursor {
+    display: inline-block;
+    width: 7px;
+    height: 14px;
+    background: var(--accent);
+    margin-left: 2px;
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+  }
+  @keyframes fadeIn { to { opacity: 1; } }
+  @keyframes blink { 50% { opacity: 0; } }
+
+  /* ---------- SECTION SHARED ---------- */
+  section { padding: 72px 0; border-bottom: 1px solid var(--border-soft); }
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 40px;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--accent);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 8px;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-size: 1.9rem;
+    font-weight: 600;
+  }
+  .section-note {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text-dim);
+  }
+
+  /* ---------- STACK ---------- */
+  .stack-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1px;
+    background: var(--border-soft);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .stack-item {
+    background: var(--bg-card);
+    padding: 20px;
+  }
+  .stack-item .k {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 6px;
+  }
+  .stack-item .v {
+    font-family: var(--font-display);
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--text);
+  }
+
+  /* ---------- PROJECTS ---------- */
+  .project-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px;
+  }
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 26px;
+    display: flex;
+    flex-direction: column;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .card:hover {
+    border-color: var(--accent-dim);
+    transform: translateY(-3px);
+  }
+  .card.wide { grid-column: span 2; }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 14px;
+  }
+  .card-status {
+    font-family: var(--font-mono);
+    font-size: 10.5px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .status-done { background: var(--teal-soft); color: var(--teal); }
+  .status-progress { background: var(--accent-soft); color: var(--accent); }
+  .card h3 {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 10px;
+  }
+  .card p {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin-bottom: 18px;
+    flex-grow: 1;
+  }
+  .tag-row { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+    padding: 3px 9px;
+    border-radius: 4px;
+  }
+  .card-link {
+    font-family: var(--font-mono);
+    font-size: 12.5px;
+    color: var(--text);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    width: fit-content;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 2px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+  .card-link:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ---------- FOOTER / CONTACT ---------- */
+  footer { padding: 64px 0 48px; border-bottom: none; }
+  .footer-grid {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 30px;
+  }
+  footer h2 { margin-bottom: 12px; }
+  footer .hero-desc { margin-bottom: 0; }
+  .footer-links { display: flex; gap: 14px; flex-wrap: wrap; }
+  .copyright {
+    margin-top: 50px;
+    font-family: var(--font-mono);
+    font-size: 11.5px;
+    color: var(--text-dim);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  /* ---------- RESPONSIVE ---------- */
+  @media (max-width: 800px) {
+    .hero-grid { grid-template-columns: 1fr; }
+    .project-grid { grid-template-columns: 1fr; }
+    .card.wide { grid-column: span 1; }
+    .nav-links { display: none; }
+    header.hero { padding: 56px 0 48px; }
+  }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="wrap">
+    <div class="logo">wboone<span>@</span>uark</div>
+    <div class="nav-links">
+      <a href="#stack"><span class="num">01</span>stack</a>
+      <a href="#projects"><span class="num">02</span>projects</a>
+      <a href="#contact"><span class="num">03</span>contact</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero">
+  <div class="wrap hero-grid">
+    <img class="site-logo-badge" src="images/Will_Boone_Logo.png" alt="Will Boone logo">
+    <div>
+      <div class="eyebrow">Seeking cybersecurity &amp; defense SWE roles, 2027</div>
+      <h1>Systems &amp; security<br><span class="accent">engineering</span>, from packet<br>to production.</h1>
+      <p class="hero-desc">
+        I'm <strong>Will Boone</strong>, a Computer Science student at the
+        <strong>University of Arkansas</strong> (GPA 3.84). I build
+        low-level network and security tooling — a real-time intrusion
+        detection system, a malware analysis sandbox, a dis<span class="ee-hidden-letter" data-ee-letter="T">t</span>ributed
+        job-queue — mostly in Go and Python, where reliability isn't
+        optional.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="resume.pdf" target="_blank" rel="noopener">↓ Resume</a>
+        <a class="btn btn-secondary" href="https://github.com/WillBoone24" target="_blank" rel="noopener">⌥ GitHub</a>
+        <a class="btn btn-secondary" href="#contact">✉ Contact</a>
+      </div>
+    </div>
+
+    <div class="terminal">
+      <div class="terminal-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <div class="terminal-title">will@uark — zsh</div>
+      </div>
+      <div class="terminal-body" id="termBody"></div>
+    </div>
+  </div>
+</header>
+
+<section id="stack">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-label">01 / Stack</div>
+        <h2>Tools I reach for</h2>
+      </div>
+      <div class="section-note">B.S. Computer Science · Exp. May 2027</div>
+    </div>
+    <div class="stack-grid">
+      <div class="stack-item"><div class="k">La<span class="ee-hidden-letter" data-ee-letter="N">n</span>guages</div><div class="v">Go</div></div>
+      <div class="stack-item"><div class="k">Languages</div><div class="v">Python</div></div>
+      <div class="stack-item"><div class="k">Languages</div><div class="v">C++</div></div>
+      <div class="stack-item"><div class="k">Languages</div><div class="v">Java</div></div>
+      <div class="stack-item"><div class="k">Languages</div><div class="v">JavaScript</div></div>
+      <div class="stack-item"><div class="k">Languages</div><div class="v">SQL</div></div>
+      <div class="stack-item"><div class="k">Tools</div><div class="v">libpcap</div></div>
+      <div class="stack-item"><div class="k">Tools</div><div class="v">YARA</div></div>
+      <div class="stack-item"><div class="k">Tools</div><div class="v">FastAPI</div></div>
+      <div class="stack-item"><div class="k">Tools</div><div class="v">SQLAlchemy</div></div>
+      <div class="stack-item"><div class="k">Framework</div><div class="v">MITRE ATT&amp;CK</div></div>
+      <div class="stack-item"><div class="k">Coursework</div><div class="v">Databases &amp; AI</div></div>
+    </div>
+  </div>
+</section>
+
+<section id="projects">
+  <div class="wrap">
+    <div class="section-head">
+      <div>
+        <div class="section-label">02 / Projects</div>
+        <h2>Selected work</h2>
+      </div>
+      <div class="section-note">3 projects · Summer 2026</div>
+    </div>
+
+    <div class="project-grid">
+
+      <div class="card wide">
+        <div class="card-top">
+          <h3>go-sentinel — Network Intrusion Detection Tool</h3>
+          <span class="card-status status-done">Shipped</span>
+        </div>
+        <p>
+          A real-time network monitor in Go that captures live pac<span class="ee-hidden-letter" data-ee-letter="K">k</span>ets via
+          libpcap and decodes Et<span class="ee-hidden-letter" data-ee-letter="H">h</span>ernet, IPv4, TCP, UDP, and DNS headers from
+          raw bytes with hand-written parsers, tracking per-flow statistics
+          across a concurrent, mutex-guarded state model. Detection
+          heuristics for TCP port scans and SYN-flood attacks use rolling
+          time-windows and configurable thresholds, with per-source alerting
+          and de-duplication to suppress repeat alarms.
+        </p>
+        <div class="tag-row">
+          <span class="tag">Go</span>
+          <span class="tag">libpcap</span>
+          <span class="tag">Concurrency</span>
+          <span class="tag">Network security</span>
+        </div>
+        <a class="card-link" href="https://github.com/WillBoone24/go-sentinel" target="_blank" rel="noopener">View repository →</a>
+      </div>
+
+      <div class="card">
+        <div class="card-top">
+          <h3>GoSandbox — Malware Analysis Sandbox</h3>
+          <span class="card-status status-done">Shipped</span>
+        </div>
+        <p>
+          A malware analysis sandbox in G<span class="ee-hidden-letter" data-ee-letter="O">o</span> combining hand-written PE/ELF
+          binary parsers with dynamic execution monitoring, correlating
+          static and behavioral signals into a weighted 0–100 threat score
+          with MITRE ATT&amp;CK-mapped findings. Sandboxed execution uses
+          cgroup/ulimit resource confinement, full syscall tracing via
+          strace, and live network capture with DNS/TLS SNI/HTTP
+          extraction, generating self-contained JSON and HTML threat
+          reports.
+        </p>
+        <div class="tag-row">
+          <span class="tag">Go</span>
+          <span class="tag">YARA</span>
+          <span class="tag">MITRE ATT&amp;CK</span>
+          <span class="tag">Malware analysis</span>
+        </div>
+        <a class="card-link" href="https://github.com/WillBoone24/Malware-Sandbox" target="_blank" rel="noopener">View repository →</a>
+      </div>
+
+      <div class="card">
+        <div class="card-top">
+          <h3>Distributed Task Scheduler</h3>
+          <span class="card-status status-done">Shipped</span>
+        </div>
+        <p>
+          A distributed job-queue system where multiple worker processes
+          poll a FastAPI backend to claim and execute priority-ordered
+          tasks, with atomic job assignment to prevent duplicate claims
+          under concurrent load — validated with 3–4 workers draining 25+
+          jobs in under 3 minutes with zero duplicate assignments.
+          Includes automatic retry with configurable limits, dead-worker
+          detection with requeueing, and a live dashboard surfacing
+          thro<span class="ee-hidden-letter" data-ee-letter="U">u</span>ghput, failure rate, and a per-worker efficiency
+          leaderboard.
+        </p>
+        <div class="tag-row">
+          <span class="tag">Python</span>
+          <span class="tag">FastAPI</span>
+          <span class="tag">SQLAlchemy</span>
+          <span class="tag">Distributed systems</span>
+        </div>
+        <a class="card-link" href="https://github.com/WillBoone24/distributed-task-scheduler" target="_blank" rel="noopener">View repository →</a>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<footer id="contact">
+  <div class="wrap">
+    <div class="footer-grid">
+      <div>
+        <div class="section-label">03 / Contact</div>
+        <h2>Let's t<span class="ee-hidden-letter" data-ee-letter="A">a</span>lk.</h2>
+        <p class="hero-desc">Open to internships and collaboration — reach out any time.</p>
+      </div>
+      <div class="footer-links">
+        <a class="btn btn-secondary" href="mailto:wboone@uark.edu">✉ Email</a>
+        <a class="btn btn-secondary" href="https://github.com/WillBoone24" target="_blank" rel="noopener">⌥ GitHub</a>
+        <a class="btn btn-secondary" href="tel:+18323128997">☎ (832) 312-8997</a>
+      </div>
+    </div>
+    <div class="copyright">
+      <span>© 2026 Will Boone · University of Arkansas, Fa<span class="ee-hidden-letter" data-ee-letter="Y">y</span>etteville</span>
+      <span>Built with HTML, CSS, and a healthy dislike of frameworks</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  const lines = [
+    { type: 'prompt', text: 'whoami' },
+    { type: 'output', text: 'Will Boone — CS @ University of Arkansas, GPA 3.84' },
+    { type: 'prompt', text: './build --project go-sentinel' },
+    { type: 'output', text: '<span class="hl">✓ shipped</span> — libpcap capture, SYN-flood &amp; port-scan detection' },
+    { type: 'prompt', text: './build --project gosandbox --status' },
+    { type: 'output', text: '<span class="hl">20/20</span> days complete — threat scoring, MITRE ATT&amp;CK mapping' },
+    { type: 'prompt', text: './build --project task-scheduler --status' },
+    { type: 'output', text: '<span class="hl">✓ shipped</span> — 25+ jobs, 0 duplicate claims' },
+    { type: 'prompt', text: 'open resume.pdf' }
+  ];
+
+  const term = document.getElementById('termBody');
+  let delay = 150;
+
+  lines.forEach((line, i) => {
+    const el = document.createElement('div');
+    el.className = 'term-line';
+    el.style.animationDelay = delay + 'ms';
+
+    if (line.type === 'prompt') {
+      el.innerHTML = '<span class="term-prompt">$</span> ' + line.text;
+    } else {
+      el.innerHTML = '<span class="term-output">' + line.text + '</span>';
+    }
+    term.appendChild(el);
+    delay += line.type === 'prompt' ? 260 : 420;
+  });
+
+  const cursorLine = document.createElement('div');
+  cursorLine.className = 'term-line';
+  cursorLine.style.animationDelay = delay + 'ms';
+  cursorLine.innerHTML = '<span class="term-prompt">$</span> <span class="cursor"></span>';
+  term.appendChild(cursorLine);
+</script>
+
+<script type="module" src="easter-egg/main.js"></script>
+
+</body>
+</html>

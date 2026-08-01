@@ -1,0 +1,128 @@
+/**
+ * terminal.css
+ * -----------------------------------------------------------------------
+ * Visual styling for the RPG frontend's full-screen terminal shell.
+ *
+ * Palette intentionally mirrors the portfolio site's current color
+ * scheme (emerald green / sky blue on near-black, IBM Plex Mono) so the
+ * two frontends read as the same brand even though they share no code —
+ * per the project architecture, neither frontend imports from the
+ * other, so this is a deliberate manual color match, not a shared
+ * stylesheet.
+ * -----------------------------------------------------------------------
+ */
+
+:root {
+  --bg: #0b0f14;
+  --text: #e8edf2;
+  --text-muted: #8b98a5;
+  --text-dim: #56626d;
+  --accent: #38d99a;   /* matches portfolio's --accent */
+  --error: #e05d5d;    /* matches portfolio's terminal-dot red */
+  --border: #1c242d;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  background: var(--bg);
+}
+
+body {
+  font-family: 'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+#term-root {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: 24px 28px;
+}
+
+.term-root {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* required for the scrollback child to actually scroll within a flex column */
+  cursor: text;
+}
+
+.term-scrollback {
+  flex: 1;
+  overflow-y: auto;
+  padding-bottom: 8px;
+}
+
+.term-line {
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+.term-line-output {
+  color: var(--text);
+}
+
+.term-line-system {
+  color: var(--text-dim);
+}
+
+.term-line-error {
+  color: var(--error);
+}
+
+.term-line-prompt {
+  color: var(--accent);
+}
+
+.term-input-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+.term-input-row-disabled {
+  opacity: 0.5;
+}
+
+.term-prompt-symbol {
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.term-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font: inherit;
+  caret-color: var(--accent);
+}
+
+.term-input::placeholder {
+  color: var(--text-dim);
+}
+
+/* Custom scrollbar for the scrollback panel — kept subtle rather than
+   the default browser scrollbar, which would look out of place inside
+   a themed terminal window. */
+.term-scrollback::-webkit-scrollbar {
+  width: 8px;
+}
+.term-scrollback::-webkit-scrollbar-track {
+  background: transparent;
+}
+.term-scrollback::-webkit-scrollbar-thumb {
+  background: var(--border);
+  border-radius: 4px;
+}
