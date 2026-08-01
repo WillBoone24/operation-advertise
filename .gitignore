@@ -1,0 +1,22 @@
+# --- Go (backend) ---
+/backend/storage/*.db
+/backend/storage/*.db.bak
+/backend/server.log
+/backend/backend
+/backend/server
+
+# --- Auto-generated dev config (scripts/write-dev-config.sh writes
+# these with this machine's IP baked in — never committed) ---
+/rpg-frontend/src/config.js
+/resume-frontend/easter-egg/config.js
+
+# --- Node (if either frontend ever gets a package.json/build step) ---
+node_modules/
+dist/
+build/
+
+# --- Editor/OS cruft ---
+.DS_Store
+.vscode/
+.idea/
+*.swp
